@@ -436,14 +436,22 @@ class ApplyTimestampRules(LogitFilter):
             if self.max_initial_timestamp_index is not None:
                 last_allowed = self.tokenizer.timestamp_begin + self.max_initial_timestamp_index
                 logits[:, last_allowed + 1 :] = -np.inf
-
-        # if sum of probability over timestamps is above any other token, sample timestamp
+        # if sum of probability over timestamps is above any other token, sample timestamp 
         logprobs = F.log_softmax(logits.float(), dim=-1)
         for k in range(tokens.shape[0]):
             timestamp_logprob = logprobs[k, self.tokenizer.timestamp_begin :].logsumexp(dim=-1)
             max_text_token_logprob = logprobs[k, : self.tokenizer.timestamp_begin].max()
-            if timestamp_logprob > max_text_token_logprob:
+            #if timestamp_logprob > max_text_token_logprob:  
+            print(timestamp_logprob,max_text_token_logprob) 
+            if timestamp_logprob > -5 :  
                 logits[k, : self.tokenizer.timestamp_begin] = -np.inf
+        # if sum of probability over timestamps is above any other token, sample timestamp
+        #logprobs = F.log_softmax(logits.float(), dim=-1)
+        #for k in range(tokens.shape[0]):
+         #   timestamp_logprob = logprobs[k, self.tokenizer.timestamp_begin :].logsumexp(dim=-1)
+          #  max_text_token_logprob = logprobs[k, : self.tokenizer.timestamp_begin].max()
+          #  if timestamp_logprob > max_text_token_logprob:
+          #      logits[k, : self.tokenizer.timestamp_begin] = -np.inf
 
 
 class DecodingTask:
